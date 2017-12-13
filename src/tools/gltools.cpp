@@ -104,6 +104,8 @@ namespace gltools
       
       if (bExitOnFail) {
         exit( EXIT_FAILURE );
+      } else {
+        abort();
       }
     }
   }

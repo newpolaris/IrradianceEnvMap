@@ -15,9 +15,8 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
-
 #ifndef NDEBUG
-  #define CHECKGLERROR()    gltools::checkGLError( __FILE__, __LINE__, "", true);
+  #define CHECKGLERROR()    gltools::checkGLError( __FILE__, __LINE__, "", false);
   #define CHECKVALUE(x)     gltools::checkValue( __FILE__, __LINE__, #x, x);
 #else
   #define CHECKGLERROR()

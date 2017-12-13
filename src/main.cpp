@@ -21,6 +21,7 @@
 #include <glsw/glsw.h>
 
 // Standard libraries
+#include <iostream>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -28,6 +29,9 @@
 #include <tools/TCamera.hpp>
 #include <tools/Timer.hpp>
 #include <tools/Logger.hpp>
+#include <tools/gltools.hpp>
+
+#define GL_ASSERT(x) {x; CHECKGLERROR()}
 
 namespace
 {
@@ -36,6 +40,9 @@ namespace
 	const char* WINDOW_NAME = "Irradiance Environment Mapping";
 
 	int glut_windowHandle = 0;  
+
+    GLuint vao;
+    GLuint programID;
 
     //~
 
@@ -92,6 +99,55 @@ namespace {
         // Logger::getInstance().open("logfile");
 
         // app.init( &camera ); 
+
+        GLuint VertexArrayID;
+        GL_ASSERT(glGenVertexArrays(1, &VertexArrayID));
+        GL_ASSERT(glBindVertexArray(VertexArrayID));
+
+        const GLchar* vertex_shader_source = "\n" \
+            "#version 330 core \n" \
+            "layout(location = 0) in vec3 vertexPosition_modelspace; \n" \
+            "void main () \n" \
+            "{ \n" \
+            " gl_Position.xyz = vertexPosition_modelspace; \n" \
+            " gl_Position.w = 1.0; \n" \
+            "} \n" \
+            "\n";
+
+        const GLchar* fragment_shader_source = "\n" \
+        "    #version 330 core \n" \
+        "    out vec4 color;   \n" \
+        "                      \n" \
+        "    void main()       \n" \
+        "    {                 \n" \
+        "        color = vec4(1.0, 1.0, 1.0, 1.0); \n" \
+        "    }                                     \n";
+
+        GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(vertex_shader, 1, &vertex_shader_source, NULL);
+        glCompileShader(vertex_shader);
+
+        GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(fragment_shader, 1, &fragment_shader_source, NULL);
+        glCompileShader(fragment_shader);
+
+        programID = glCreateProgram();
+        glAttachShader(programID, vertex_shader);
+        glAttachShader(programID, fragment_shader);
+        glLinkProgram(programID);
+
+        glDeleteShader(vertex_shader);
+        glDeleteShader(fragment_shader);
+
+        static const GLfloat g_vertex_buffer_data[] = {
+            -1.0f, -1.0f, 0.0f,
+            1.0f, -1.0f, 0.0f,
+            0.0f,  1.0f, 0.0f,
+        };
+
+        GL_ASSERT(glGenBuffers(1, &vao));
+        GL_ASSERT(glBindBuffer(GL_ARRAY_BUFFER, vao));
+        GL_ASSERT(glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW));
 	}
 
 	void initExtension()
@@ -156,6 +212,7 @@ namespace {
 		glutMouseFunc( glut_mouse_callback );
 		glutMotionFunc( glut_motion_callback );
 		glutIdleFunc( glut_idle_callback );
+
 	}
 
 	void finalizeApp()
@@ -182,14 +239,21 @@ namespace {
         // app.update();
 
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );    
-
         glPolygonMode(GL_FRONT_AND_BACK, (bWireframe)? GL_LINE : GL_FILL);
+
+        // Use our shader
+		glUseProgram(programID);
+
+        GL_ASSERT(glEnableVertexAttribArray(0));
+        GL_ASSERT(glBindBuffer(GL_ARRAY_BUFFER, vao));
+        GL_ASSERT(glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0));
+        GL_ASSERT(glDrawArrays(GL_TRIANGLES, 0, 3));
+        GL_ASSERT(glDisableVertexAttribArray(0));
 
         // app.render();
 
         glutSwapBuffers();
     }
-
 
     void glut_keyboard_callback(unsigned char key, int x, int y)
     {
@@ -252,15 +316,18 @@ namespace {
     {
         moveCamera( key, true);
     }  
+
     void glut_specialUp_callback(int key, int x, int y)
     {
         moveCamera( key, false);
     }  
+
     void glut_motion_callback(int x, int y)
     {
         camera.motionHandler( x, y, false);    
         glutPostRedisplay();
     }  
+
     void glut_mouse_callback(int button, int state, int x, int y)
     {
         if (state == GLUT_DOWN) { camera.motionHandler( x, y, true); }    
