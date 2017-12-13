@@ -4,3 +4,4 @@ iem
 *.swp
 *.swo
 cmake_install.cmake
+libglsw.a

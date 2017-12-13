@@ -123,6 +123,73 @@ iem/fast:
 	$(MAKE) -f CMakeFiles/iem.dir/build.make CMakeFiles/iem.dir/build
 .PHONY : iem/fast
 
+#=============================================================================
+# Target rules for targets named glsw
+
+# Build rule for target.
+glsw: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 glsw
+.PHONY : glsw
+
+# fast build rule for target.
+glsw/fast:
+	$(MAKE) -f CMakeFiles/glsw.dir/build.make CMakeFiles/glsw.dir/build
+.PHONY : glsw/fast
+
+external/glsw/bstrlib.o: external/glsw/bstrlib.c.o
+
+.PHONY : external/glsw/bstrlib.o
+
+# target to build an object file
+external/glsw/bstrlib.c.o:
+	$(MAKE) -f CMakeFiles/glsw.dir/build.make CMakeFiles/glsw.dir/external/glsw/bstrlib.c.o
+.PHONY : external/glsw/bstrlib.c.o
+
+external/glsw/bstrlib.i: external/glsw/bstrlib.c.i
+
+.PHONY : external/glsw/bstrlib.i
+
+# target to preprocess a source file
+external/glsw/bstrlib.c.i:
+	$(MAKE) -f CMakeFiles/glsw.dir/build.make CMakeFiles/glsw.dir/external/glsw/bstrlib.c.i
+.PHONY : external/glsw/bstrlib.c.i
+
+external/glsw/bstrlib.s: external/glsw/bstrlib.c.s
+
+.PHONY : external/glsw/bstrlib.s
+
+# target to generate assembly for a file
+external/glsw/bstrlib.c.s:
+	$(MAKE) -f CMakeFiles/glsw.dir/build.make CMakeFiles/glsw.dir/external/glsw/bstrlib.c.s
+.PHONY : external/glsw/bstrlib.c.s
+
+external/glsw/glsw.o: external/glsw/glsw.c.o
+
+.PHONY : external/glsw/glsw.o
+
+# target to build an object file
+external/glsw/glsw.c.o:
+	$(MAKE) -f CMakeFiles/glsw.dir/build.make CMakeFiles/glsw.dir/external/glsw/glsw.c.o
+.PHONY : external/glsw/glsw.c.o
+
+external/glsw/glsw.i: external/glsw/glsw.c.i
+
+.PHONY : external/glsw/glsw.i
+
+# target to preprocess a source file
+external/glsw/glsw.c.i:
+	$(MAKE) -f CMakeFiles/glsw.dir/build.make CMakeFiles/glsw.dir/external/glsw/glsw.c.i
+.PHONY : external/glsw/glsw.c.i
+
+external/glsw/glsw.s: external/glsw/glsw.c.s
+
+.PHONY : external/glsw/glsw.s
+
+# target to generate assembly for a file
+external/glsw/glsw.c.s:
+	$(MAKE) -f CMakeFiles/glsw.dir/build.make CMakeFiles/glsw.dir/external/glsw/glsw.c.s
+.PHONY : external/glsw/glsw.c.s
+
 src/main.o: src/main.cpp.o
 
 .PHONY : src/main.o
@@ -150,6 +217,114 @@ src/main.cpp.s:
 	$(MAKE) -f CMakeFiles/iem.dir/build.make CMakeFiles/iem.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/tools/Logger.o: src/tools/Logger.cpp.o
+
+.PHONY : src/tools/Logger.o
+
+# target to build an object file
+src/tools/Logger.cpp.o:
+	$(MAKE) -f CMakeFiles/iem.dir/build.make CMakeFiles/iem.dir/src/tools/Logger.cpp.o
+.PHONY : src/tools/Logger.cpp.o
+
+src/tools/Logger.i: src/tools/Logger.cpp.i
+
+.PHONY : src/tools/Logger.i
+
+# target to preprocess a source file
+src/tools/Logger.cpp.i:
+	$(MAKE) -f CMakeFiles/iem.dir/build.make CMakeFiles/iem.dir/src/tools/Logger.cpp.i
+.PHONY : src/tools/Logger.cpp.i
+
+src/tools/Logger.s: src/tools/Logger.cpp.s
+
+.PHONY : src/tools/Logger.s
+
+# target to generate assembly for a file
+src/tools/Logger.cpp.s:
+	$(MAKE) -f CMakeFiles/iem.dir/build.make CMakeFiles/iem.dir/src/tools/Logger.cpp.s
+.PHONY : src/tools/Logger.cpp.s
+
+src/tools/TCamera.o: src/tools/TCamera.cpp.o
+
+.PHONY : src/tools/TCamera.o
+
+# target to build an object file
+src/tools/TCamera.cpp.o:
+	$(MAKE) -f CMakeFiles/iem.dir/build.make CMakeFiles/iem.dir/src/tools/TCamera.cpp.o
+.PHONY : src/tools/TCamera.cpp.o
+
+src/tools/TCamera.i: src/tools/TCamera.cpp.i
+
+.PHONY : src/tools/TCamera.i
+
+# target to preprocess a source file
+src/tools/TCamera.cpp.i:
+	$(MAKE) -f CMakeFiles/iem.dir/build.make CMakeFiles/iem.dir/src/tools/TCamera.cpp.i
+.PHONY : src/tools/TCamera.cpp.i
+
+src/tools/TCamera.s: src/tools/TCamera.cpp.s
+
+.PHONY : src/tools/TCamera.s
+
+# target to generate assembly for a file
+src/tools/TCamera.cpp.s:
+	$(MAKE) -f CMakeFiles/iem.dir/build.make CMakeFiles/iem.dir/src/tools/TCamera.cpp.s
+.PHONY : src/tools/TCamera.cpp.s
+
+src/tools/Timer.o: src/tools/Timer.cpp.o
+
+.PHONY : src/tools/Timer.o
+
+# target to build an object file
+src/tools/Timer.cpp.o:
+	$(MAKE) -f CMakeFiles/iem.dir/build.make CMakeFiles/iem.dir/src/tools/Timer.cpp.o
+.PHONY : src/tools/Timer.cpp.o
+
+src/tools/Timer.i: src/tools/Timer.cpp.i
+
+.PHONY : src/tools/Timer.i
+
+# target to preprocess a source file
+src/tools/Timer.cpp.i:
+	$(MAKE) -f CMakeFiles/iem.dir/build.make CMakeFiles/iem.dir/src/tools/Timer.cpp.i
+.PHONY : src/tools/Timer.cpp.i
+
+src/tools/Timer.s: src/tools/Timer.cpp.s
+
+.PHONY : src/tools/Timer.s
+
+# target to generate assembly for a file
+src/tools/Timer.cpp.s:
+	$(MAKE) -f CMakeFiles/iem.dir/build.make CMakeFiles/iem.dir/src/tools/Timer.cpp.s
+.PHONY : src/tools/Timer.cpp.s
+
+src/tools/gltools.o: src/tools/gltools.cpp.o
+
+.PHONY : src/tools/gltools.o
+
+# target to build an object file
+src/tools/gltools.cpp.o:
+	$(MAKE) -f CMakeFiles/iem.dir/build.make CMakeFiles/iem.dir/src/tools/gltools.cpp.o
+.PHONY : src/tools/gltools.cpp.o
+
+src/tools/gltools.i: src/tools/gltools.cpp.i
+
+.PHONY : src/tools/gltools.i
+
+# target to preprocess a source file
+src/tools/gltools.cpp.i:
+	$(MAKE) -f CMakeFiles/iem.dir/build.make CMakeFiles/iem.dir/src/tools/gltools.cpp.i
+.PHONY : src/tools/gltools.cpp.i
+
+src/tools/gltools.s: src/tools/gltools.cpp.s
+
+.PHONY : src/tools/gltools.s
+
+# target to generate assembly for a file
+src/tools/gltools.cpp.s:
+	$(MAKE) -f CMakeFiles/iem.dir/build.make CMakeFiles/iem.dir/src/tools/gltools.cpp.s
+.PHONY : src/tools/gltools.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -159,9 +334,28 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... iem"
+	@echo "... glsw"
+	@echo "... external/glsw/bstrlib.o"
+	@echo "... external/glsw/bstrlib.i"
+	@echo "... external/glsw/bstrlib.s"
+	@echo "... external/glsw/glsw.o"
+	@echo "... external/glsw/glsw.i"
+	@echo "... external/glsw/glsw.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/tools/Logger.o"
+	@echo "... src/tools/Logger.i"
+	@echo "... src/tools/Logger.s"
+	@echo "... src/tools/TCamera.o"
+	@echo "... src/tools/TCamera.i"
+	@echo "... src/tools/TCamera.s"
+	@echo "... src/tools/Timer.o"
+	@echo "... src/tools/Timer.i"
+	@echo "... src/tools/Timer.s"
+	@echo "... src/tools/gltools.o"
+	@echo "... src/tools/gltools.i"
+	@echo "... src/tools/gltools.s"
 .PHONY : help
 
 
