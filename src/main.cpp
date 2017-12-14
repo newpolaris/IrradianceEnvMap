@@ -34,9 +34,11 @@
 #include <GLType/ProgramShader.h>
 #include <GLType/Texture.h>
 #include <SkyBox.h>
+#include <Skydome.h>
 #include <Mesh.h>
 
 #include <fstream>
+#include <memory>
 
 #define GL_ASSERT(x) {x; CHECKGLERROR()}
 
@@ -49,9 +51,10 @@ namespace
 	int glut_windowHandle = 0;  
 
     ProgramShader m_program;
-    Texture2D m_texture;
+	std::shared_ptr<Texture2D> m_texture;
     PlaneMesh m_mesh;
 	SkyBox m_skybox;
+	Skydome m_Skydome;
 
     //~
 
@@ -117,8 +120,7 @@ namespace {
 		glswAddDirectiveToken("*", "#version 330 core");
 
         // App Objects
-        camera.setViewParams( glm::vec3( 0.0f, 2.0f, 15.0f),
-                glm::vec3( 0.0f, 0.0f, 0.0f) );
+        camera.setViewParams( glm::vec3( 0.0f, 2.0f, 15.0f), glm::vec3( 0.0f, 0.0f, 0.0f) );
         camera.setMoveCoefficient(0.35f);
 
         Timer::getInstance().start();
@@ -136,17 +138,24 @@ namespace {
         m_program.link();  
 
         m_mesh.init();
-        m_texture.initialize();
-        // m_texture.load("resource/girl.png");
 
+		m_texture = std::make_shared<Texture2D>();
+        m_texture->initialize();
+#if 1
+        m_texture->load("resource/skydome/021.jpg");
+#else
 		const int width = 1000;
 		ByteArray image = ReadFileSync( "resource/grace_probe.float" );
 		if (image.size() > 0) {
-			m_texture.load(GL_RGB, width, width, GL_RGB, GL_FLOAT, image.data() );
+			m_texture->load(GL_RGB, width, width, GL_RGB, GL_FLOAT, image.data() );
 		}
+#endif
 		m_skybox.init();
 		m_skybox.addCubemap( "resource/MountainPath/*.jpg" );
 		m_skybox.setCubemap( 0u );
+		
+		m_Skydome.initialize();
+		m_Skydome.setTexture( m_texture );
 	}
 
 	void initExtension()
@@ -219,7 +228,8 @@ namespace {
         glswShutdown();  
         m_program.destroy();
         m_mesh.destroy();
-        m_texture.destroy();
+        m_texture->destroy();
+		m_Skydome.shutdown();
         Logger::getInstance().close();
 	}
 
@@ -243,14 +253,15 @@ namespace {
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );    
         glPolygonMode(GL_FRONT_AND_BACK, (bWireframe)? GL_LINE : GL_FILL);
 
-		m_skybox.render( camera );
+		// m_skybox.render( camera );
+		m_Skydome.render( camera );
 
         // Use our shader
         m_program.bind();
 
         glm::mat4 mvp = camera.getViewProjMatrix() * m_mesh.getModelMatrix();
         m_program.setUniform( "uModelViewProjMatrix", mvp );
-        m_texture.bind(0u);
+        m_texture->bind(0u);
         m_mesh.draw();
 
         // app.render();

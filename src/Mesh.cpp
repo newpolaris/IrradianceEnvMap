@@ -111,96 +111,96 @@ void PlaneMesh::draw() const
 
 void SphereMesh::init()
 {
-  assert( !m_bInitialized );
-  m_bInitialized = true;
-  
-  
-  const float RADIUS = m_radius; //
-  
-  m_count = 2*m_meshResolution*(m_meshResolution+2);  
-  
-  std::vector<glm::vec3> &positions = m_vertexBuffer.getPosition();
-  std::vector<glm::vec3> &normals   = m_vertexBuffer.getNormal();
-  std::vector<glm::vec2> &texCoords = m_vertexBuffer.getTexcoord();
-  
-  positions.resize( m_count );
-  normals.resize( m_count );
-  texCoords.resize( m_count );
-    
-  glm::vec3 *pPos = &(positions[0]);
-  glm::vec3 *pNor = &(normals[0]);
-  glm::vec2 *pUV = &(texCoords[0]);  
-  
-  
-  float theta2, phi;    // next theta angle, phi angle
-  float ct, st;         // cos(theta), sin(theta)
-  float ct2, st2;       // cos(next theta), sin(next theta)
-  float cp, sp;         // cos(phi), sin(phi)
-  
-  
-  const float TwoPI = 2.0f*M_PI;
-  const float Delta = 1.0f / float(m_meshResolution);
-  
-  ct2 = 0.0f; st2 = -1.0f;
-  
-  /* Create the sphere from bottom to top (like a spiral) as a tristrip */
+	assert( !m_bInitialized );
+	m_bInitialized = true;
+
+
+	const float RADIUS = m_radius; //
+
+	m_count = 2*m_meshResolution*(m_meshResolution+2);  
+
+	std::vector<glm::vec3> &positions = m_vertexBuffer.getPosition();
+	std::vector<glm::vec3> &normals   = m_vertexBuffer.getNormal();
+	std::vector<glm::vec2> &texCoords = m_vertexBuffer.getTexcoord();
+
+	positions.resize( m_count );
+	normals.resize( m_count );
+	texCoords.resize( m_count );
+
+	glm::vec3 *pPos = &(positions[0]);
+	glm::vec3 *pNor = &(normals[0]);
+	glm::vec2 *pUV = &(texCoords[0]);  
+
+
+	float theta2, phi;    // next theta angle, phi angle
+	float ct, st;         // cos(theta), sin(theta)
+	float ct2, st2;       // cos(next theta), sin(next theta)
+	float cp, sp;         // cos(phi), sin(phi)
+
+
+	const float TwoPI = 2.0f*M_PI;
+	const float Delta = 1.0f / float(m_meshResolution);
+
+	ct2 = 0.0f; st2 = -1.0f;
+
+	/* Create the sphere from bottom to top (like a spiral) as a tristrip */
 	for (int j=0; j<m_meshResolution; ++j)
 	{    
-    ct = ct2;
-    st = st2;
-    
-    theta2 = ((j+1) * Delta - 0.5f) * M_PI;
-    ct2 = cos(theta2);
-    st2 = sin(theta2);    
-    
+		ct = ct2;
+		st = st2;
+
+		theta2 = ((j+1) * Delta - 0.5f) * M_PI;
+		ct2 = cos(theta2);
+		st2 = sin(theta2);    
+
 		pNor->x = ct;
 		pNor->y = st;
 		pNor->z = 0.0f;
-    *pPos = RADIUS * (*pNor);
+		*pPos = RADIUS * (*pNor);
 		pUV->x = 0.0f;
 		pUV->y = j * Delta;
-    ++pPos; ++pNor; ++pUV;
-    
+		++pPos; ++pNor; ++pUV;
+
 		for (int i=0; i<m_meshResolution+1; ++i)
 		{
-      phi = TwoPI * i * Delta;
-      cp = cos(phi);
-      sp = sin(phi);      
-			
+			phi = TwoPI * i * Delta;
+			cp = cos(phi);
+			sp = sin(phi);      
+
 			pNor->x = ct2 * cp;
 			pNor->y = st2;
 			pNor->z = ct2 * sp;      
-      *pPos = RADIUS * (*pNor);
-      pUV->x = i * Delta;
-      pUV->y = (j+1) * Delta;      
-      ++pPos; ++pNor; ++pUV;
-      
-      pNor->x = ct * cp;
+			*pPos = RADIUS * (*pNor);
+			pUV->x = i * Delta;
+			pUV->y = (j+1) * Delta;      
+			++pPos; ++pNor; ++pUV;
+
+			pNor->x = ct * cp;
 			pNor->y = st;
 			pNor->z = ct * sp;			
-      *pPos = RADIUS * (*pNor);      
-      pUV->x = i * Delta;
+			*pPos = RADIUS * (*pNor);      
+			pUV->x = i * Delta;
 			pUV->y = j * Delta;      
-      ++pPos; ++pNor; ++pUV;      
+			++pPos; ++pNor; ++pUV;      
 		}    
-    
+
 		pNor->x = ct2;
 		pNor->y = st2;
 		pNor->z = 0.0f;    
-    *pPos = RADIUS * (*pNor);
-    pUV->x = 1.0f;
+		*pPos = RADIUS * (*pNor);
+		pUV->x = 1.0f;
 		pUV->y = 1.0f;
-    ++pPos; ++pNor; ++pUV;    
+		++pPos; ++pNor; ++pUV;    
 	}
-  
-  //-------------------------
-  
-  
-  m_vertexBuffer.initialize();  
-  m_vertexBuffer.complete( GL_STATIC_DRAW );
-  m_vertexBuffer.cleanData();
-  
-  CHECKGLERROR();
+
+	//-------------------------
+
+
+	m_vertexBuffer.initialize();  
+	m_vertexBuffer.complete( GL_STATIC_DRAW );
+	m_vertexBuffer.cleanData();
+
+	CHECKGLERROR();
 }
 
 void SphereMesh::draw() const
