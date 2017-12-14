@@ -87,8 +87,8 @@ namespace {
 
 		// GLSW : shader file manager
 		glswInit();
-		// glswSetPath("./shaders/", ".glsl");
-		// glswAddDirectiveToken("*", "#version 330 core");
+		glswSetPath("./shaders/", ".glsl");
+		glswAddDirectiveToken("*", "#version 330 core");
 
         // App Objects
         camera.setViewParams( glm::vec3( 0.0f, 2.0f, 15.0f),
@@ -104,24 +104,8 @@ namespace {
         GL_ASSERT(glGenVertexArrays(1, &VertexArrayID));
         GL_ASSERT(glBindVertexArray(VertexArrayID));
 
-        const GLchar* vertex_shader_source = "\n" \
-            "#version 330 core \n" \
-            "layout(location = 0) in vec3 vertexPosition_modelspace; \n" \
-            "void main () \n" \
-            "{ \n" \
-            " gl_Position.xyz = vertexPosition_modelspace; \n" \
-            " gl_Position.w = 1.0; \n" \
-            "} \n" \
-            "\n";
-
-        const GLchar* fragment_shader_source = "\n" \
-        "    #version 330 core \n" \
-        "    out vec4 color;   \n" \
-        "                      \n" \
-        "    void main()       \n" \
-        "    {                 \n" \
-        "        color = vec4(1.0, 1.0, 1.0, 1.0); \n" \
-        "    }                                     \n";
+        const GLchar* vertex_shader_source = glswGetShader( "Default.Vertex" );
+        const GLchar* fragment_shader_source = glswGetShader( "Default.Fragment" );
 
         GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vertex_shader, 1, &vertex_shader_source, NULL);
