@@ -141,7 +141,7 @@ namespace {
 
 		m_texture = std::make_shared<Texture2D>();
         m_texture->initialize();
-#if 1
+#if 0
         m_texture->load("resource/skydome/021.jpg");
 #else
 		const int width = 1000;
