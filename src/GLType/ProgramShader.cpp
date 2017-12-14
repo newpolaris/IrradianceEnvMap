@@ -41,6 +41,9 @@ void ProgramShader::destroy()
 
 void ProgramShader::addShader(GLenum shaderType, const std::string &tag)
 {
+  if (glswGetError() != 0) {
+	fprintf( stderr, "GLSW : %s", glswGetError());
+  }
   assert( glswGetError() == 0 );
   
   

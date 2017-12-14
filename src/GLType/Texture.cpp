@@ -90,7 +90,40 @@ bool Texture2D::load(const std::string &name)
   return true;
 }
 
+bool Texture2D::load( GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid * data )
+{
+  assert( 0u != m_id );  
+    
+  bind();
+  {  
+    #if ENABLE_TEXTURE_MIPMAP  
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    #else  
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    #endif  
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);  
+    
+    #if ENABLE_TEXTURE_ANISOTROPICFILTERING
+    int maxAnisoLevel;        
+    glGetIntegerv( GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAnisoLevel);
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisoLevel);
+    #endif
+    
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);  
+    
+    assert( data != nullptr );  
+    
+    glTexImage2D( GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, data); 
 
+    #if ENABLE_TEXTURE_MIPMAP
+    glGenerateMipmap( GL_TEXTURE_2D );  
+    #endif  
+  }
+  unbind();
+  
+  return true;
+}
 
 /** TEXTURE CUBEMAP --------------------------------- */
 

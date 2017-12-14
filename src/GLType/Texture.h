@@ -87,7 +87,8 @@ class Texture2D : public Texture
   public:
     Texture2D() : Texture() {}    
     virtual GLenum getTarget() const { return GL_TEXTURE_2D; }
-    virtual bool load(const std::string &name);
+	virtual bool load(const std::string &name);
+	virtual bool load(GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* data);
 };
 
 

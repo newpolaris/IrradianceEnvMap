@@ -33,7 +33,10 @@
 
 #include <GLType/ProgramShader.h>
 #include <GLType/Texture.h>
+#include <SkyBox.h>
 #include <Mesh.h>
+
+#include <fstream>
 
 #define GL_ASSERT(x) {x; CHECKGLERROR()}
 
@@ -48,6 +51,7 @@ namespace
     ProgramShader m_program;
     Texture2D m_texture;
     PlaneMesh m_mesh;
+	SkyBox m_skybox;
 
     //~
 
@@ -78,6 +82,23 @@ namespace
 }
 
 namespace {
+
+	typedef std::vector<std::istream::char_type> ByteArray;
+	ByteArray ReadFileSync( const std::string& name )
+	{
+		std::ifstream inputFile;
+		inputFile.open( name, std::ios::binary | std::ios::ate );
+		if (!inputFile.is_open())
+			return ByteArray();
+		auto filesize = static_cast<size_t>(inputFile.tellg());
+		ByteArray buf = ByteArray(filesize * sizeof( char ) );
+		inputFile.ignore( std::numeric_limits<std::streamsize>::max() );
+		inputFile.seekg( std::ios::beg );
+		inputFile.read( reinterpret_cast<char*>(buf.data()), filesize );
+		inputFile.close();
+		return buf;
+	}
+
 
 	void initApp(int argc, char** argv)
 	{
@@ -113,6 +134,19 @@ namespace {
         m_program.addShader( GL_VERTEX_SHADER, "Default.Vertex");
         m_program.addShader( GL_FRAGMENT_SHADER, "Default.Fragment");
         m_program.link();  
+
+        m_mesh.init();
+        m_texture.initialize();
+        // m_texture.load("resource/girl.png");
+
+		const int width = 1000;
+		ByteArray image = ReadFileSync( "resource/grace_probe.float" );
+		if (image.size() > 0) {
+			m_texture.load(GL_RGB, width, width, GL_RGB, GL_FLOAT, image.data() );
+		}
+		m_skybox.init();
+		m_skybox.addCubemap( "resource/MountainPath/*.jpg" );
+		m_skybox.setCubemap( 0u );
 	}
 
 	void initExtension()
@@ -152,10 +186,6 @@ namespace {
         glFrontFace(GL_CCW);
 
         glDisable( GL_MULTISAMPLE );
-
-        m_mesh.init();
-        m_texture.initialize();
-        m_texture.load("resource/girl.png");
 	}
 
 	void initWindow(int argc, char** argv)
@@ -213,6 +243,8 @@ namespace {
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );    
         glPolygonMode(GL_FRONT_AND_BACK, (bWireframe)? GL_LINE : GL_FILL);
 
+		m_skybox.render( camera );
+
         // Use our shader
         m_program.bind();
 
@@ -254,6 +286,10 @@ namespace {
                     glutReshapeWindow( WINDOW_WIDTH, WINDOW_HEIGHT);
                 }
                 break;
+
+			case 'r':
+				m_skybox.toggleAutoRotate();
+				break;
 
             default:
                 break;
