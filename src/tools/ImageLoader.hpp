@@ -167,7 +167,7 @@ struct Image_t
       bytesPerPixel = bpp / 8u;
       width = FreeImage_GetWidth(dib);
       height = FreeImage_GetHeight(dib);
-      target = (width==height)? GL_TEXTURE_2D : GL_TEXTURE_RECTANGLE;
+      target = GL_TEXTURE_2D;
       type = GL_UNSIGNED_BYTE;
       
       return true;

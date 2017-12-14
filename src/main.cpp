@@ -30,7 +30,10 @@
 #include <tools/Timer.hpp>
 #include <tools/Logger.hpp>
 #include <tools/gltools.hpp>
+
 #include <GLType/ProgramShader.h>
+#include <GLType/Texture.h>
+#include <Mesh.h>
 
 #define GL_ASSERT(x) {x; CHECKGLERROR()}
 
@@ -42,8 +45,9 @@ namespace
 
 	int glut_windowHandle = 0;  
 
-    GLuint vao;
-    ProgramShader program;
+    ProgramShader m_program;
+    Texture2D m_texture;
+    PlaneMesh m_mesh;
 
     //~
 
@@ -105,20 +109,10 @@ namespace {
         GL_ASSERT(glGenVertexArrays(1, &VertexArrayID));
         GL_ASSERT(glBindVertexArray(VertexArrayID));
 
-        program.initalize();
-        program.addShader( GL_VERTEX_SHADER, "Default.Vertex");
-        program.addShader( GL_FRAGMENT_SHADER, "Default.Fragment");
-        program.link();  
-
-        static const GLfloat g_vertex_buffer_data[] = {
-            -1.0f, -1.0f, 0.0f,
-            1.0f, -1.0f, 0.0f,
-            0.0f,  1.0f, 0.0f,
-        };
-
-        GL_ASSERT(glGenBuffers(1, &vao));
-        GL_ASSERT(glBindBuffer(GL_ARRAY_BUFFER, vao));
-        GL_ASSERT(glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW));
+        m_program.initalize();
+        m_program.addShader( GL_VERTEX_SHADER, "Default.Vertex");
+        m_program.addShader( GL_FRAGMENT_SHADER, "Default.Fragment");
+        m_program.link();  
 	}
 
 	void initExtension()
@@ -158,6 +152,10 @@ namespace {
         glFrontFace(GL_CCW);
 
         glDisable( GL_MULTISAMPLE );
+
+        m_mesh.init();
+        m_texture.initialize();
+        m_texture.load("resource/girl.png");
 	}
 
 	void initWindow(int argc, char** argv)
@@ -189,7 +187,9 @@ namespace {
 	void finalizeApp()
 	{
         glswShutdown();  
-        program.destroy();
+        m_program.destroy();
+        m_mesh.destroy();
+        m_texture.destroy();
         Logger::getInstance().close();
 	}
 
@@ -214,16 +214,15 @@ namespace {
         glPolygonMode(GL_FRONT_AND_BACK, (bWireframe)? GL_LINE : GL_FILL);
 
         // Use our shader
-        program.bind();
+        m_program.bind();
 
-        GL_ASSERT(glEnableVertexAttribArray(0));
-        GL_ASSERT(glBindBuffer(GL_ARRAY_BUFFER, vao));
-        GL_ASSERT(glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0));
-        GL_ASSERT(glDrawArrays(GL_TRIANGLES, 0, 3));
-        GL_ASSERT(glDisableVertexAttribArray(0));
+        glm::mat4 mvp = camera.getViewProjMatrix() * m_mesh.getModelMatrix();
+        m_program.setUniform( "uModelViewProjMatrix", mvp );
+        m_texture.bind(0u);
+        m_mesh.draw();
 
         // app.render();
-        program.unbind();
+        m_program.unbind();
 
         glutSwapBuffers();
     }

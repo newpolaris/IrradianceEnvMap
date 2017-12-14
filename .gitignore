@@ -5,3 +5,4 @@ iem
 *.swo
 cmake_install.cmake
 libglsw.a
+Makefile
