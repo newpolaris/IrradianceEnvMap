@@ -190,6 +190,33 @@ external/glsw/glsw.c.s:
 	$(MAKE) -f CMakeFiles/glsw.dir/build.make CMakeFiles/glsw.dir/external/glsw/glsw.c.s
 .PHONY : external/glsw/glsw.c.s
 
+src/GLType/ProgramShader.o: src/GLType/ProgramShader.cpp.o
+
+.PHONY : src/GLType/ProgramShader.o
+
+# target to build an object file
+src/GLType/ProgramShader.cpp.o:
+	$(MAKE) -f CMakeFiles/iem.dir/build.make CMakeFiles/iem.dir/src/GLType/ProgramShader.cpp.o
+.PHONY : src/GLType/ProgramShader.cpp.o
+
+src/GLType/ProgramShader.i: src/GLType/ProgramShader.cpp.i
+
+.PHONY : src/GLType/ProgramShader.i
+
+# target to preprocess a source file
+src/GLType/ProgramShader.cpp.i:
+	$(MAKE) -f CMakeFiles/iem.dir/build.make CMakeFiles/iem.dir/src/GLType/ProgramShader.cpp.i
+.PHONY : src/GLType/ProgramShader.cpp.i
+
+src/GLType/ProgramShader.s: src/GLType/ProgramShader.cpp.s
+
+.PHONY : src/GLType/ProgramShader.s
+
+# target to generate assembly for a file
+src/GLType/ProgramShader.cpp.s:
+	$(MAKE) -f CMakeFiles/iem.dir/build.make CMakeFiles/iem.dir/src/GLType/ProgramShader.cpp.s
+.PHONY : src/GLType/ProgramShader.cpp.s
+
 src/main.o: src/main.cpp.o
 
 .PHONY : src/main.o
@@ -341,6 +368,9 @@ help:
 	@echo "... external/glsw/glsw.o"
 	@echo "... external/glsw/glsw.i"
 	@echo "... external/glsw/glsw.s"
+	@echo "... src/GLType/ProgramShader.o"
+	@echo "... src/GLType/ProgramShader.i"
+	@echo "... src/GLType/ProgramShader.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

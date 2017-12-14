@@ -30,6 +30,7 @@
 #include <tools/Timer.hpp>
 #include <tools/Logger.hpp>
 #include <tools/gltools.hpp>
+#include <GLType/ProgramShader.h>
 
 #define GL_ASSERT(x) {x; CHECKGLERROR()}
 
@@ -42,7 +43,7 @@ namespace
 	int glut_windowHandle = 0;  
 
     GLuint vao;
-    GLuint programID;
+    ProgramShader program;
 
     //~
 
@@ -104,24 +105,10 @@ namespace {
         GL_ASSERT(glGenVertexArrays(1, &VertexArrayID));
         GL_ASSERT(glBindVertexArray(VertexArrayID));
 
-        const GLchar* vertex_shader_source = glswGetShader( "Default.Vertex" );
-        const GLchar* fragment_shader_source = glswGetShader( "Default.Fragment" );
-
-        GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertex_shader, 1, &vertex_shader_source, NULL);
-        glCompileShader(vertex_shader);
-
-        GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragment_shader, 1, &fragment_shader_source, NULL);
-        glCompileShader(fragment_shader);
-
-        programID = glCreateProgram();
-        glAttachShader(programID, vertex_shader);
-        glAttachShader(programID, fragment_shader);
-        glLinkProgram(programID);
-
-        glDeleteShader(vertex_shader);
-        glDeleteShader(fragment_shader);
+        program.initalize();
+        program.addShader( GL_VERTEX_SHADER, "Default.Vertex");
+        program.addShader( GL_FRAGMENT_SHADER, "Default.Fragment");
+        program.link();  
 
         static const GLfloat g_vertex_buffer_data[] = {
             -1.0f, -1.0f, 0.0f,
@@ -202,6 +189,7 @@ namespace {
 	void finalizeApp()
 	{
         glswShutdown();  
+        program.destroy();
         Logger::getInstance().close();
 	}
 
@@ -226,7 +214,7 @@ namespace {
         glPolygonMode(GL_FRONT_AND_BACK, (bWireframe)? GL_LINE : GL_FILL);
 
         // Use our shader
-		glUseProgram(programID);
+        program.bind();
 
         GL_ASSERT(glEnableVertexAttribArray(0));
         GL_ASSERT(glBindBuffer(GL_ARRAY_BUFFER, vao));
@@ -235,6 +223,7 @@ namespace {
         GL_ASSERT(glDisableVertexAttribArray(0));
 
         // app.render();
+        program.unbind();
 
         glutSwapBuffers();
     }
