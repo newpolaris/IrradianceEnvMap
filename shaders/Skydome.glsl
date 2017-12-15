@@ -56,13 +56,14 @@ vec3 ApplySRGBCurve( vec3 x )
 
 void main()
 {  
-  vec3 D = normalize(vTexCoord);
   float pi = 3.141529;
+  float exposure = 10.f;
+  vec3 D = normalize(vTexCoord);
   float r = 1/pi * acos(D.z) / sqrt(D.x*D.x + D.y*D.y);
   vec2 coord = D.xy * r * 0.5 + 0.5;
 
   vec3 color = texture(tex, coord).xyz;
-  color *= 10;
+  color *= exposure;
   color = ApplySRGBCurve(ToneMapACES(color));
   fragColor = vec4(color, 1);
 }

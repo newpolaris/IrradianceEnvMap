@@ -55,12 +55,12 @@ namespace
 
     ProgramShader m_program;
 	std::shared_ptr<Texture2D> m_texture;
-    PlaneMesh m_mesh;
+    SphereMesh m_mesh(32, 2);
 	SkyBox m_skybox;
 	Skydome m_Skydome;
 
 	float coeffs[9][3] ;                /* Spherical harmonic coefficients */
-	float matrix[4][4][3] ;             /* Matrix for quadratic form */
+	glm::mat4 matrix[3] ;               /* Matrix for quadratic form */
 
     //~
 
@@ -251,6 +251,7 @@ namespace {
 		else return(sin(x)/x) ;
 	}
 
+	// eq (10)
 	void prefilter(fRGB* im, int width, int height)
 	{
 		/* The main integration routine.  Of course, there are better ways
@@ -266,6 +267,7 @@ namespace {
 				/* We now find the cartesian components for the point (i,j) */
 				float u,v,r,theta,phi,x,y,z,domega ;
 
+				// from image 'http://www.pauldebevec.com/Probes/'
 				v = (height/2.0 - i)/(height/2.0);  /* v ranges from -1 to 1 */
 				u = (j-width/2.0)/(width/2.0);      /* u ranges from -1 to 1 */
 				r = sqrt(u*u+v*v) ;                 /* The "radius" */
@@ -279,7 +281,7 @@ namespace {
 				z = cos(theta) ;
 
 				/* Computation of the solid angle.  This follows from some
-				   elementary calculus converting sin(theta) d theta d phi into
+				   elementary calculus converting eq(10)'s sin(theta) d theta d phi into
 				   coordinates in terms of r.  This calculation should be redone 
 				   if the form of the input changes */
 
@@ -320,19 +322,19 @@ namespace {
 		printf("\nMATRIX M: RED\n") ;
 		for (i = 0 ; i < 4 ; i++) {
 			for (j = 0 ; j < 4 ; j++)
-				printf("%9.6f ",matrix[i][j][0]) ;
+				printf("%9.6f ",matrix[0][i][j]) ;
 			printf("\n") ;
 		}
 		printf("\nMATRIX M: GREEN\n") ;
 		for (i = 0 ; i < 4 ; i++) {
 			for (j = 0 ; j < 4 ; j++)
-				printf("%9.6f ",matrix[i][j][1]) ;
+				printf("%9.6f ",matrix[1][i][j]) ;
 			printf("\n") ;
 		}
 		printf("\nMATRIX M: BLUE\n") ;
 		for (i = 0 ; i < 4 ; i++) {
 			for (j = 0 ; j < 4 ; j++)
-				printf("%9.6f ",matrix[i][j][2]) ;
+				printf("%9.6f ",matrix[2][i][j]) ;
 			printf("\n") ;
 		}
 
@@ -349,25 +351,25 @@ namespace {
 
 		for (col = 0 ; col < 3 ; col++) { /* Equation 12 */
 
-			matrix[0][0][col] = c1*coeffs[8][col] ; /* c1 L_{22}  */
-			matrix[0][1][col] = c1*coeffs[4][col] ; /* c1 L_{2-2} */
-			matrix[0][2][col] = c1*coeffs[7][col] ; /* c1 L_{21}  */
-			matrix[0][3][col] = c2*coeffs[3][col] ; /* c2 L_{11}  */
+			matrix[col][0][0] = c1*coeffs[8][col] ; /* c1 L_{22}  */
+			matrix[col][0][1] = c1*coeffs[4][col] ; /* c1 L_{2-2} */
+			matrix[col][0][2] = c1*coeffs[7][col] ; /* c1 L_{21}  */
+			matrix[col][0][3] = c2*coeffs[3][col] ; /* c2 L_{11}  */
 
-			matrix[1][0][col] = c1*coeffs[4][col] ; /* c1 L_{2-2} */
-			matrix[1][1][col] = -c1*coeffs[8][col]; /*-c1 L_{22}  */
-			matrix[1][2][col] = c1*coeffs[5][col] ; /* c1 L_{2-1} */
-			matrix[1][3][col] = c2*coeffs[1][col] ; /* c2 L_{1-1} */
+			matrix[col][1][0] = c1*coeffs[4][col] ; /* c1 L_{2-2} */
+			matrix[col][1][1] = -c1*coeffs[8][col]; /*-c1 L_{22}  */
+			matrix[col][1][2] = c1*coeffs[5][col] ; /* c1 L_{2-1} */
+			matrix[col][1][3] = c2*coeffs[1][col] ; /* c2 L_{1-1} */
 
-			matrix[2][0][col] = c1*coeffs[7][col] ; /* c1 L_{21}  */
-			matrix[2][1][col] = c1*coeffs[5][col] ; /* c1 L_{2-1} */
-			matrix[2][2][col] = c3*coeffs[6][col] ; /* c3 L_{20}  */
-			matrix[2][3][col] = c2*coeffs[2][col] ; /* c2 L_{10}  */
+			matrix[col][2][0] = c1*coeffs[7][col] ; /* c1 L_{21}  */
+			matrix[col][2][1] = c1*coeffs[5][col] ; /* c1 L_{2-1} */
+			matrix[col][2][2] = c3*coeffs[6][col] ; /* c3 L_{20}  */
+			matrix[col][2][3] = c2*coeffs[2][col] ; /* c2 L_{10}  */
 
-			matrix[3][0][col] = c2*coeffs[3][col] ; /* c2 L_{11}  */
-			matrix[3][1][col] = c2*coeffs[1][col] ; /* c2 L_{1-1} */
-			matrix[3][2][col] = c2*coeffs[2][col] ; /* c2 L_{10}  */
-			matrix[3][3][col] = c4*coeffs[0][col] - c5*coeffs[6][col] ; 
+			matrix[col][3][0] = c2*coeffs[3][col] ; /* c2 L_{11}  */
+			matrix[col][3][1] = c2*coeffs[1][col] ; /* c2 L_{1-1} */
+			matrix[col][3][2] = c2*coeffs[2][col] ; /* c2 L_{10}  */
+			matrix[col][3][3] = c4*coeffs[0][col] - c5*coeffs[6][col] ; 
 			/* c4 L_{00} - c5 L_{20} */
 		}
 	}
@@ -456,6 +458,22 @@ namespace {
 
         glm::mat4 mvp = camera.getViewProjMatrix() * m_mesh.getModelMatrix();
         m_program.setUniform( "uModelViewProjMatrix", mvp );
+
+		// Vertex uniforms
+		m_program.setUniform( "uModelMatrix", m_mesh.getModelMatrix());
+		m_program.setUniform( "uNormalMatrix", m_mesh.getNormalMatrix());
+		m_program.setUniform( "uEyePosWS", camera.getPosition());
+		m_program.setUniform( "uInvSkyboxRotation", m_Skydome.getInvRotateMatrix() );
+		// TextureCubemap *cubemap = m_skyBox.getCurrentCubemap();
+
+		// if (cubemap->hasSphericalHarmonics())
+		{
+			// glm::mat4 *M = cubemap->getSHMatrices();
+			m_program.setUniform( "uIrradianceMatrix[0]", matrix[0]);
+			m_program.setUniform( "uIrradianceMatrix[1]", matrix[1]);
+			m_program.setUniform( "uIrradianceMatrix[2]", matrix[2]);
+		}
+
         m_texture->bind(0u);
         m_mesh.draw();
 

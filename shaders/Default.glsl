@@ -1,47 +1,115 @@
+/*
+ *          EnvMapping.glsl
+ *
+ *
+ *  The irradiance algorithm is based on 
+ *     
+ *     "An Efficient Representation for Irradiance Environment Maps"
+ *                               by Ravi Ramamoorthi & Pat Hanrahan
+ *
+ */
+
+
+//------------------------------------------------------------------------------
+
+
 -- Vertex
+
+// IN
 layout(location = 0) in vec4 inPosition;
 layout(location = 1) in vec3 inNormal;
-layout(location = 2) in vec2 inTexCoord;
 
 // OUT
-out vec2 vTexCoord;
+out vec3 vNormalWS;
+out vec3 vViewDirWS;
+out vec3 vIrradiance;
 
 // UNIFORM
 uniform mat4 uModelViewProjMatrix;
+uniform mat4 uModelMatrix;
+uniform mat3 uNormalMatrix;
+uniform vec3 uEyePosWS;
+uniform mat4 uIrradianceMatrix[3];  // RGB irradiance coefficient matrices
+uniform mat3 uInvSkyboxRotation;    // tp question
+
+
+vec3 computeIrradiance( vec3 normal, mat4 M[3])
+{
+  vec4 n = vec4( normal, 1.0f);
+  
+  vec3 _output;  
+  _output.r = dot( n, M[0] * n);
+  _output.g = dot( n, M[1] * n);
+  _output.b = dot( n, M[2] * n);
+    
+  return _output;
+}
 
 void main()
 {
-	gl_Position = uModelViewProjMatrix * vec4( inPosition.xyz, 1.0f);
-	vTexCoord = inTexCoord;
+  // Clip Space position
+  gl_Position = uModelViewProjMatrix * inPosition;
+
+  // World Space normal
+  vNormalWS = normalize( uNormalMatrix * inNormal );
+  
+  // World Space view direction from world space position
+  vec3 posWS = vec3(uModelMatrix * inPosition);
+  vViewDirWS = normalize(posWS - uEyePosWS);
+  
+  // Irradiance color for RGB components
+  vec3 normalWS = uInvSkyboxRotation * vNormalWS;
+  vIrradiance = computeIrradiance( normalWS, uIrradianceMatrix);
 }
+
+
+--
+
+//------------------------------------------------------------------------------
+
 
 -- Fragment
 
 // IN
-in vec2 vTexCoord;
+in vec3 vNormalWS;
+in vec3 vViewDirWS;
+in vec3 vIrradiance;
 
-// out
-layout(location = 0) out vec4 outColor;
+// OUT
+layout(location = 0) out vec4 fColor;
 
-uniform sampler2D tex;
+// UNIFORM
+// uniform samplerCube uEnvmap;
 
-vec3 ToneMapACES( vec3 hdr )
-{
-    const float A = 2.51, B = 0.03, C = 2.43, D = 0.59, E = 0.14;
-    return clamp((hdr * (A * hdr + B)) / (hdr * (C * hdr + D) + E), 0, 1);
-}
-
-vec3 ApplySRGBCurve( vec3 x )
-{
-	float c = 1.0/2.2;
-	vec3 f = vec3(c, c, c); 
-	return pow(x, f);
-}
 
 void main()
-{
-	vec4 color = texture(tex, vTexCoord);
-	color.xyz *= 10;
-	color.xyz = ApplySRGBCurve(ToneMapACES(color.xyz));
-	outColor = color;
+{  
+  // Normal color for debugging
+  //fColor.rgb = 0.5f*normal + 0.5f;
+ 
+  // Compute the WS reflection vector from normalized EyeDir & Normal
+  vec3 r = reflect( vViewDirWS, vNormalWS);
+  
+  // vec3 reflectColor = texture( uEnvmap, r).rgb; 
+    
+  /*
+  vec3 refractColor; // some refraction with chromatic aberration
+  refractColor.r = texture( uEnvmap, refract( vViewDirWS, vNormalWS, 0.21f)).r;
+  refractColor.g = texture( uEnvmap, refract( vViewDirWS, vNormalWS, 0.20f)).g; 
+  refractColor.b = texture( uEnvmap, refract( vViewDirWS, vNormalWS, 0.22f)).b; 
+  */
+
+  vec3 envColor; // = reflectColor;
+
+
+  /// Final composition
+  
+  //fColor.rgb = envColor;
+  //fColor.rgb = mix( envColor, vIrradiance, 0.5f );
+  
+  fColor.rgb = vIrradiance * 10;
+
+  // change to get transparency
+  fColor.a = 1.0f;
 }
+
