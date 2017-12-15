@@ -79,8 +79,7 @@ in vec3 vIrradiance;
 layout(location = 0) out vec4 fColor;
 
 // UNIFORM
-// uniform samplerCube uEnvmap;
-
+uniform samplerCube uEnvmap;
 
 void main()
 {  
@@ -90,7 +89,7 @@ void main()
   // Compute the WS reflection vector from normalized EyeDir & Normal
   vec3 r = reflect( vViewDirWS, vNormalWS);
   
-  // vec3 reflectColor = texture( uEnvmap, r).rgb; 
+  vec3 reflectColor = texture( uEnvmap, r).rgb; 
     
   /*
   vec3 refractColor; // some refraction with chromatic aberration
@@ -99,7 +98,7 @@ void main()
   refractColor.b = texture( uEnvmap, refract( vViewDirWS, vNormalWS, 0.22f)).b; 
   */
 
-  vec3 envColor; // = reflectColor;
+  vec3 envColor = reflectColor;
 
 
   /// Final composition
@@ -107,7 +106,7 @@ void main()
   //fColor.rgb = envColor;
   //fColor.rgb = mix( envColor, vIrradiance, 0.5f );
   
-  fColor.rgb = vIrradiance * 10;
+  fColor.rgb = vIrradiance;
 
   // change to get transparency
   fColor.a = 1.0f;

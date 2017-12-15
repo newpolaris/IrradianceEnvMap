@@ -9,7 +9,7 @@
 #include <cassert>
 #include <tools/ImageLoader.hpp>
 #include <tools/Timer.hpp>
-// #include "irradianceEnvMap.hpp"
+#include "irradianceEnvMap.h"
 
 #include "Texture.h"
 
@@ -179,7 +179,7 @@ bool TextureCubemap::load(const std::string &name)
     fprintf( stderr, "Computing the irradiance matrices : " ); fflush(stderr);    
     float tStart = Timer::getInstance().getRelativeTime();    
     
-    // IrradianceEnvMap::prefilter( image, m_shMatrix);    
+    IrradianceEnvMap::prefilter( image, m_shMatrix);    
     
     fprintf( stderr, "%.3f seconds.\n", 0.001f*(Timer::getInstance().getRelativeTime() - tStart)); 
     

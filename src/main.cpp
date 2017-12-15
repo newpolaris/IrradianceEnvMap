@@ -55,9 +55,9 @@ namespace
 
     ProgramShader m_program;
 	std::shared_ptr<Texture2D> m_texture;
-    SphereMesh m_mesh(32, 2);
+    SphereMesh m_mesh( 48, 5.0f);
 	SkyBox m_skybox;
-	Skydome m_Skydome;
+	Skydome m_skydome;
 
 	float coeffs[9][3] ;                /* Spherical harmonic coefficients */
 	glm::mat4 matrix[3] ;               /* Matrix for quadratic form */
@@ -164,11 +164,12 @@ namespace {
 		}
 #endif
 		m_skybox.init();
-		m_skybox.addCubemap( "resource/MountainPath/*.jpg" );
+		// m_skybox.addCubemap( "resource/MountainPath/*.jpg" );
+		m_skybox.addCubemap( "resource/Cube/*.bmp" );
 		m_skybox.setCubemap( 0u );
 		
-		m_Skydome.initialize();
-		m_Skydome.setTexture( m_texture );
+		// m_skydome.initialize();
+		// m_skydome.setTexture( m_texture );
 	}
 
 	void initExtension()
@@ -242,7 +243,7 @@ namespace {
         m_program.destroy();
         m_mesh.destroy();
         m_texture->destroy();
-		m_Skydome.shutdown();
+		m_skydome.shutdown();
         Logger::getInstance().close();
 	}
 
@@ -450,8 +451,8 @@ namespace {
         glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );    
         glPolygonMode(GL_FRONT_AND_BACK, (bWireframe)? GL_LINE : GL_FILL);
 
-		// m_skybox.render( camera );
-		m_Skydome.render( camera );
+		m_skybox.render( camera );
+		// m_skydome.render( camera );
 
         // Use our shader
         m_program.bind();
@@ -463,19 +464,20 @@ namespace {
 		m_program.setUniform( "uModelMatrix", m_mesh.getModelMatrix());
 		m_program.setUniform( "uNormalMatrix", m_mesh.getNormalMatrix());
 		m_program.setUniform( "uEyePosWS", camera.getPosition());
-		m_program.setUniform( "uInvSkyboxRotation", m_Skydome.getInvRotateMatrix() );
-		// TextureCubemap *cubemap = m_skyBox.getCurrentCubemap();
+		m_program.setUniform( "uInvSkyboxRotation", m_skybox.getInvRotateMatrix() );
+		TextureCubemap *cubemap = m_skybox.getCurrentCubemap();
 
-		// if (cubemap->hasSphericalHarmonics())
+		if (cubemap->hasSphericalHarmonics())
 		{
-			// glm::mat4 *M = cubemap->getSHMatrices();
+			glm::mat4* matrix = cubemap->getSHMatrices();
 			m_program.setUniform( "uIrradianceMatrix[0]", matrix[0]);
 			m_program.setUniform( "uIrradianceMatrix[1]", matrix[1]);
 			m_program.setUniform( "uIrradianceMatrix[2]", matrix[2]);
 		}
 
-        m_texture->bind(0u);
+        cubemap->bind(0u);
         m_mesh.draw();
+        cubemap->unbind(0u);
 
         // app.render();
         m_program.unbind();
