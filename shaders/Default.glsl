@@ -84,28 +84,26 @@ uniform samplerCube uEnvmap;
 void main()
 {  
   // Normal color for debugging
-  //fColor.rgb = 0.5f*normal + 0.5f;
+  fColor.rgb = 0.5f*vNormalWS + 0.5f;
  
   // Compute the WS reflection vector from normalized EyeDir & Normal
   vec3 r = reflect( vViewDirWS, vNormalWS);
   
   vec3 reflectColor = texture( uEnvmap, r).rgb; 
-    
-  /*
+  vec3 envColor = reflectColor;
+
+#if 0
   vec3 refractColor; // some refraction with chromatic aberration
   refractColor.r = texture( uEnvmap, refract( vViewDirWS, vNormalWS, 0.21f)).r;
   refractColor.g = texture( uEnvmap, refract( vViewDirWS, vNormalWS, 0.20f)).g; 
   refractColor.b = texture( uEnvmap, refract( vViewDirWS, vNormalWS, 0.22f)).b; 
-  */
-
-  vec3 envColor = reflectColor;
-
+  envColor = refractColor;
+#endif
 
   /// Final composition
   
   //fColor.rgb = envColor;
   //fColor.rgb = mix( envColor, vIrradiance, 0.5f );
-  
   fColor.rgb = vIrradiance;
 
   // change to get transparency
