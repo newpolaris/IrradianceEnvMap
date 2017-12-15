@@ -95,6 +95,8 @@ void prefilter( const Image_t envmap[6], glm::mat4 M[3])
         
         glm::vec3 dir; float solidAngle;
         getTexelAttrib( texId, u, v, texelSize, &dir, &solidAngle);
+		float tmp = u*u + v*v + 1.0;
+		solidAngle = 4.f / (sqrtf(tmp) * tmp);
         sumWeight += solidAngle;
         
         float lambda;
@@ -218,7 +220,7 @@ void getTexelAttrib( const int texId, const float u, const float v, const float 
   
   #define AREA(x, y)  atan2f(x * y, sqrtf(x * x + y * y + 1.0))
     
-  *solidAngle = (AREA(x0,y0) + AREA(x1,y1)) - (AREA(x0,y1) + AREA(x1,y0));
+  // *solidAngle = (AREA(x0,y0) + AREA(x1,y1)) - (AREA(x0,y1) + AREA(x1,y0));
   
   #undef AREA  
 }
