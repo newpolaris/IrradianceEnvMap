@@ -5,12 +5,8 @@
 // OpenGL & GLEW (GL Extension Wrangler)
 #include <GL/glew.h>
 
-// GLUT (GL Utility Toolkit)
-#if defined(__APPLE__) || defined(MACOSX)
-  #include <GLUT/glut.h>
-#else
-  #include <GL/freeglut.h>
-#endif
+// GLFW
+#include <glfw3.h>
 
 // GLM for matrix transformation
 #include <glm/glm.hpp>
@@ -51,7 +47,8 @@ namespace
     const unsigned int WINDOW_HEIGHT = 600u;
 	const char* WINDOW_NAME = "Irradiance Environment Mapping";
 
-	int glut_windowHandle = 0;  
+	bool bCloseApp = false;
+	GLFWwindow* window = nullptr;  
 
     ProgramShader m_program;
 	std::shared_ptr<Texture2D> m_texture;
@@ -78,20 +75,20 @@ namespace
 	void initGL();
 	void initWindow(int argc, char** argv);
     void finalizeApp();
+	void mainLoopApp();
+    void moveCamera( int key, bool isPressed );
+	void handleInput();
+    void handleKeyboard(float delta);
 	void prefilter(fRGB* im, int width, int height);
 	void printcoeffs();
 	void tomatrix();
+    void renderScene();
 	void updatecoeffs(float hdr[3], float domega, float x, float y, float z);
 
-    void glut_reshape_callback(int, int);    
-    void glut_display_callback();
-    void glut_keyboard_callback( unsigned char, int, int);
-    void glut_special_callback( int, int, int);    
-    void glut_specialUp_callback( int, int, int);    
-    void glut_mouse_callback(int, int, int, int);
-    void glut_motion_callback(int, int);
-    void glut_idle_callback();
-    void glut_timer_callback(int);
+    void glfw_keyboard_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+    void glfw_reshape_callback(GLFWwindow* window, int width, int height);
+    void glfw_mouse_callback(GLFWwindow* window, int button, int action, int mods);
+    void glfw_motion_callback(GLFWwindow* window, double xpos, double ypos);
 }
 
 namespace {
@@ -213,27 +210,31 @@ namespace {
 
 	void initWindow(int argc, char** argv)
 	{
-		glutInit(&argc, argv);
-		glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-
-        glutInitDisplayMode(GLUT_3_2_CORE_PROFILE | GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH | GLUT_STENCIL);
-		glut_windowHandle = glutCreateWindow( WINDOW_NAME );
-
-		if (glut_windowHandle < 1)
+		// Initialise GLFW
+		if( !glfwInit() )
 		{
-			fprintf( stderr, "Error: window creation failed.\n");
+			fprintf( stderr, "Failed to initialize GLFW\n" );
 			exit( EXIT_FAILURE );
 		}
+		glfwWindowHint(GLFW_SAMPLES, 4);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		
+		window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_NAME, NULL, NULL );
+		if( window == NULL ){
+			fprintf( stderr, "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n" );
+			glfwTerminate();
+			exit( EXIT_FAILURE );
+		}
+		glfwMakeContextCurrent(window);
 
-		// GLUT Events' Callback
-		glutReshapeFunc( glut_reshape_callback );
-		glutDisplayFunc( glut_display_callback );
-		glutKeyboardFunc( glut_keyboard_callback );
-		glutSpecialFunc( glut_special_callback );
-		glutSpecialUpFunc( glut_specialUp_callback );
-		glutMouseFunc( glut_mouse_callback );
-		glutMotionFunc( glut_motion_callback );
-		glutIdleFunc( glut_idle_callback );
+		// GLFW Events' Callback
+		glfwSetWindowSizeCallback( window, glfw_reshape_callback );
+		glfwSetKeyCallback( window, glfw_keyboard_callback );
+		glfwSetMouseButtonCallback( window, glfw_mouse_callback );
+		glfwSetCursorPosCallback( window, glfw_motion_callback );
 
 	}
 
@@ -245,6 +246,21 @@ namespace {
         m_texture->destroy();
 		m_skydome.shutdown();
         Logger::getInstance().close();
+		glfwTerminate();
+	}
+
+	void mainLoopApp()
+	{
+		do {
+			renderScene();
+
+			/* Swap front and back buffers */
+			glfwSwapBuffers(window);
+
+			/* Poll for and process events */
+			glfwPollEvents();
+		}
+		while (!bCloseApp && glfwWindowShouldClose(window) == 0);
 	}
 
 	float sinc(float x) {               /* Supporting sinc function */
@@ -431,18 +447,18 @@ namespace {
 		}
 	}
 
-    // GLUT Callbacks_________________________________________________  
+    // GLFW Callbacks_________________________________________________  
 
 
-    void glut_reshape_callback(int w, int h)
+    void glfw_reshape_callback(GLFWwindow* window, int width, int height)
     {
-        glViewport( 0, 0, w, h);
+        glViewport( 0, 0, width, height);
 
-        float aspectRatio = ((float)w) / ((float)h);
+        float aspectRatio = ((float)width) / ((float)height);
         camera.setProjectionParams( 60.0f, aspectRatio, 0.1f, 250.0f);
     }
 
-    void glut_display_callback()
+    void renderScene()
     {    
         Timer::getInstance().update();
         camera.update();
@@ -481,103 +497,92 @@ namespace {
 
         // app.render();
         m_program.unbind();
-
-        glutSwapBuffers();
     }
 
-    void glut_keyboard_callback(unsigned char key, int x, int y)
+    void glfw_keyboard_callback(GLFWwindow* window, int key, int scancode, int action, int mods) 
+	{
+        moveCamera( key, action != GLFW_RELEASE);
+
+		bool bPressed = action == GLFW_PRESS;
+		if (bPressed) {
+			switch (key)
+			{
+				case GLFW_KEY_ESCAPE:
+					bCloseApp = true;
+
+				case GLFW_KEY_W:
+					bWireframe = !bWireframe;
+					break;
+
+				case GLFW_KEY_T:
+					{
+						Timer &timer = Timer::getInstance();
+						printf( "fps : %d [%.3f ms]\n", timer.getFPS(), timer.getElapsedTime());
+					}
+					break;
+
+				case GLFW_KEY_F:      
+					bFullscreen = !bFullscreen;
+#if UNDONE
+					if (bFullscreen) {
+						glutFullScreen();
+					} else {
+						glutReshapeWindow( WINDOW_WIDTH, WINDOW_HEIGHT);
+					}
+#endif
+					break;
+
+				case GLFW_KEY_R:
+					m_skybox.toggleAutoRotate();
+					break;
+
+				default:
+					break;
+			}
+		}
+    }
+
+    void moveCamera( int key, bool isPressed )
     {
         switch (key)
         {
-            case 27:
-                exit( EXIT_SUCCESS );
+		case GLFW_KEY_UP:
+			camera.keyboardHandler( MOVE_FORWARD, isPressed);
+			break;
 
-            case 'w':
-                bWireframe = !bWireframe;
-                break;
+		case GLFW_KEY_DOWN:
+			camera.keyboardHandler( MOVE_BACKWARD, isPressed);
+			break;
 
-            case 't':
-                {
-                    Timer &timer = Timer::getInstance();
-                    printf( "fps : %d [%.3f ms]\n", timer.getFPS(), timer.getElapsedTime());
-                }
-                break;
+		case GLFW_KEY_LEFT:
+			camera.keyboardHandler( MOVE_LEFT, isPressed);
+			break;
 
-            case 'f':      
-                bFullscreen = !bFullscreen;
-
-                if (bFullscreen) {
-                    glutFullScreen();
-                } else {
-                    glutReshapeWindow( WINDOW_WIDTH, WINDOW_HEIGHT);
-                }
-                break;
-
-			case 'r':
-				m_skybox.toggleAutoRotate();
-				break;
-
-            default:
-                break;
-        }
-
-        // app.keyEvent(key);
-    }
-
-    void moveCamera( int key, bool isPressed)
-    {
-        switch (key)
-        {
-            case GLUT_KEY_UP:
-                camera.keyboardHandler( MOVE_FORWARD, isPressed);
-                break;
-
-            case GLUT_KEY_DOWN:
-                camera.keyboardHandler( MOVE_BACKWARD, isPressed);
-                break;
-
-            case GLUT_KEY_LEFT:
-                camera.keyboardHandler( MOVE_LEFT, isPressed);
-                break;
-
-            case GLUT_KEY_RIGHT:
-                camera.keyboardHandler( MOVE_RIGHT, isPressed);
-                break;
+		case GLFW_KEY_RIGHT:
+			camera.keyboardHandler( MOVE_RIGHT, isPressed);
+			break;
         }
     }
 
-    void glut_special_callback(int key, int x, int y)
+    void glfw_motion_callback(GLFWwindow* window, double xpos, double ypos)
     {
-        moveCamera( key, true);
+        camera.motionHandler( xpos, ypos, false);    
     }  
 
-    void glut_specialUp_callback(int key, int x, int y)
+    void glfw_mouse_callback(GLFWwindow* window, int button, int action, int mods)
     {
-        moveCamera( key, false);
-    }  
-
-    void glut_motion_callback(int x, int y)
-    {
-        camera.motionHandler( x, y, false);    
-        glutPostRedisplay();
-    }  
-
-    void glut_mouse_callback(int button, int state, int x, int y)
-    {
-        if (state == GLUT_DOWN) { camera.motionHandler( x, y, true); }    
-    }
-
-    void glut_idle_callback()
-    {    
-        //glutWarpPointer( WINDOW_WIDTH/2, WINDOW_HEIGHT/2);    
-        glutPostRedisplay();    
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) { 
+			double xpos, ypos;
+			glfwGetCursorPos(window, &xpos, &ypos);
+			camera.motionHandler( xpos, ypos, true); 
+		}    
     }
 }
 
 int main(int argc, char** argv)
 {
 	initApp(argc, argv);
-	glutMainLoop();
+	mainLoopApp();
 	finalizeApp();
     return EXIT_SUCCESS;
 }

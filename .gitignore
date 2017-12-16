@@ -6,3 +6,4 @@ iem
 cmake_install.cmake
 libglsw.a
 Makefile
+external/glfw3.h
