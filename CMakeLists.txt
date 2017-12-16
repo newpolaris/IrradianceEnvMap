@@ -13,6 +13,7 @@ FILE( GLOB_RECURSE SRC src/* )
 INCLUDE_DIRECTORIES( src/ 
 	external/ 
 	external/glfw-3.1.2/include/GLFW/
+	external/glew-1.13.0/include/
 	)
 
 FILE( GLOB GLSW external/glsw/*.c external/glsw/*.h )
@@ -33,12 +34,8 @@ if(APPLE)
     SET( EXTRA_LIBS ${COCOA_LIBRARY} ${OpenGL_LIBRARY} ${IOKIT_LIBRARY} ${COREVIDEO_LIBRARY} )
 ENDIF(APPLE)
 
-find_package(GLEW REQUIRED glew)
-include_directories(${GLEW_INCLUDE_DIR})
-link_directories(${GLEW_LIBRARY_DIRS})
-
-SET(PLATFORM_LIBS freeimage m glfw)
+SET(PLATFORM_LIBS freeimage m glfw GLEW_1130)
 
 ADD_EXECUTAbLE( iem ${SRC} )
 
-TARGET_LINK_LIBRARIES( iem ${PLATFORM_LIBS} glew glsw ${EXTRA_LIBS} ${GLEW_LIBRARIES})
+TARGET_LINK_LIBRARIES( iem ${PLATFORM_LIBS} glsw ${EXTRA_LIBS})
