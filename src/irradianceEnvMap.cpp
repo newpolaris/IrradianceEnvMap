@@ -29,7 +29,7 @@ namespace IrradianceEnvMap {
 #define Y7(n)   (1.092548f*n.x*n.z)                     /* L_21 */
 #define Y8(n)   (0.546274f*(n.x*n.x - n.y*n.y))         /* L_22 */
 
-#define IEM_TEST  0x00
+#define IEM_TEST  0
 
 #if IEM_TEST
 
@@ -72,7 +72,7 @@ void prefilter( const Image_t envmap[6], glm::mat4 M[3])
   /// Precompute generals attribs needed inside the loop
   const int texRes = envmap[0].width;
   const float texelSize = 1.0f / float(texRes);
-  const float dColor = 1.0f / float( (sizeof(unsigned char) << 8) - 1 ); //    
+  const float dColor = 1.0f / 255.f;
   
   // Take care of the internal format (ugly!)
   const int nc = (envmap[0].internalFormat==GL_RGBA)?4:3; //
@@ -93,53 +93,40 @@ void prefilter( const Image_t envmap[6], glm::mat4 M[3])
       {
         u = 2.0f * ((j+0.5f) * texelSize) - 1.0f;        
         
-        glm::vec3 dir; float solidAngle;
+        glm::vec3 dir; 
+		float solidAngle;
         getTexelAttrib( texId, u, v, texelSize, &dir, &solidAngle);
+#if TEST_SIMPLE
 		float tmp = u*u + v*v + 1.0;
 		solidAngle = 4.f / (sqrtf(tmp) * tmp);
+#endif
         sumWeight += solidAngle;
         
         float lambda;
         
-        lambda = (pixels[RED] * dColor) * solidAngle;  
-        shCoeff[RED][0] += lambda * Y0( dir );
-        shCoeff[RED][1] += lambda * Y1( dir );
-        shCoeff[RED][2] += lambda * Y2( dir );
-        shCoeff[RED][3] += lambda * Y3( dir );
-        shCoeff[RED][4] += lambda * Y4( dir );
-        shCoeff[RED][5] += lambda * Y5( dir );
-        shCoeff[RED][6] += lambda * Y6( dir );
-        shCoeff[RED][7] += lambda * Y7( dir );
-        shCoeff[RED][8] += lambda * Y8( dir );
-        
-        lambda = (pixels[GREEN] * dColor) * solidAngle;
-        shCoeff[GREEN][0] += lambda * Y0( dir );
-        shCoeff[GREEN][1] += lambda * Y1( dir );
-        shCoeff[GREEN][2] += lambda * Y2( dir );
-        shCoeff[GREEN][3] += lambda * Y3( dir );
-        shCoeff[GREEN][4] += lambda * Y4( dir );
-        shCoeff[GREEN][5] += lambda * Y5( dir );
-        shCoeff[GREEN][6] += lambda * Y6( dir );
-        shCoeff[GREEN][7] += lambda * Y7( dir );
-        shCoeff[GREEN][8] += lambda * Y8( dir );        
-        
-        lambda = (pixels[BLUE] * dColor) * solidAngle;
-        shCoeff[BLUE][0] += lambda * Y0( dir );
-        shCoeff[BLUE][1] += lambda * Y1( dir );
-        shCoeff[BLUE][2] += lambda * Y2( dir );
-        shCoeff[BLUE][3] += lambda * Y3( dir );
-        shCoeff[BLUE][4] += lambda * Y4( dir );
-        shCoeff[BLUE][5] += lambda * Y5( dir );
-        shCoeff[BLUE][6] += lambda * Y6( dir );
-        shCoeff[BLUE][7] += lambda * Y7( dir );
-        shCoeff[BLUE][8] += lambda * Y8( dir );
+		for (int k = 0; k < 3; k++)
+		{
+			lambda = (pixels[k] * dColor) * solidAngle;  
+			shCoeff[k][0] += lambda * Y0( dir );
+			shCoeff[k][1] += lambda * Y1( dir );
+			shCoeff[k][2] += lambda * Y2( dir );
+			shCoeff[k][3] += lambda * Y3( dir );
+			shCoeff[k][4] += lambda * Y4( dir );
+			shCoeff[k][5] += lambda * Y5( dir );
+			shCoeff[k][6] += lambda * Y6( dir );
+			shCoeff[k][7] += lambda * Y7( dir );
+			shCoeff[k][8] += lambda * Y8( dir );
+		}
         
         pixels += nc;
       }
     }
   }
   
-  /**/
+  // sumWeight for basic : pi * 4
+  printf("\nsumWeight %f\n", sumWeight);
+
+  /* TODO: why not 4pi ? */
   const float dnorm = 2.0f * M_PI / sumWeight;
   for (int i=0; i<9; ++i)
   {
@@ -219,8 +206,7 @@ void getTexelAttrib( const int texId, const float u, const float v, const float 
   float y1 = v + texelSize;
   
   #define AREA(x, y)  atan2f(x * y, sqrtf(x * x + y * y + 1.0))
-    
-  // *solidAngle = (AREA(x0,y0) + AREA(x1,y1)) - (AREA(x0,y1) + AREA(x1,y0));
+  *solidAngle = (AREA(x0,y0) + AREA(x1,y1)) - (AREA(x0,y1) + AREA(x1,y0));
   
   #undef AREA  
 }

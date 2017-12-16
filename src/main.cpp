@@ -159,7 +159,7 @@ namespace {
 		if (image.size() > 0) {
 			prefilter(reinterpret_cast<fRGB*>(image.data()), width, width);
 			tomatrix();
-			printcoeffs();
+			// printcoeffs();
 			m_texture->load(GL_RGB, width, width, GL_RGB, GL_FLOAT, image.data() );
 		}
 #endif
