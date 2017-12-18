@@ -43,10 +43,10 @@ class Logger : public Singleton<Logger>
     void open( const std::string filename );
     void close();
     
-    void write( const std::string &s, ...);
+    void write( const std::string s, ...);
     
     /** Like write, but disable when NDEBUG not define */
-    void debug( const std::string &s, ...);    
+    void debug( const std::string s, ...);    
   
   private:
     Logger(const Logger&);

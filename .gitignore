@@ -7,3 +7,8 @@ cmake_install.cmake
 libglsw.a
 Makefile
 external/glfw3.h
+external/FreeImage/Debug/
+external/FreeImage/Release/
+external/FreeImage/FreeImage.dir/
+external/FreeImage/FreeImageTest.dir/
+build/

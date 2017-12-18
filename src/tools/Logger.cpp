@@ -32,7 +32,7 @@ void Logger::close()
   }
 }
 
-void Logger::write( const std::string &format, ...)
+void Logger::write( const std::string format, ...)
 {
   int ret=0;
    
@@ -52,7 +52,7 @@ void Logger::write( const std::string &format, ...)
   va_end( args );
 }
 
-void Logger::debug( const std::string &format, ...)
+void Logger::debug( const std::string format, ...)
 {
   #ifndef NDEBUG
   

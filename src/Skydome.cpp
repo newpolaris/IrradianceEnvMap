@@ -79,7 +79,7 @@ void Skydome::render(const TCamera& camera)
 		//-------------------------------------------------
 
 		// Vertex uniform
-		glm::mat4 scale = glm::scale(1.f, -1.f, 1.f);
+		glm::mat4 scale = glm::scale(glm::vec3(1.f, -1.f, 1.f));
 		glm::mat4 followCamera = glm::translate( glm::mat4(1.0f), camera.getPosition());
 		glm::mat4 model = m_SphereMesh->getModelMatrix() * followCamera * m_rotateMatrix;
 		glm::mat4 mvp = camera.getViewProjMatrix() * model * scale;    

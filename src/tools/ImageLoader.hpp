@@ -13,7 +13,8 @@
 #define IMAGELOADER_HPP
 
 #include <GL/glew.h>
-#include <FreeImage/FreeImage.h>
+#define FREEIMAGE_LIB
+#include <FreeImage.h>
 #include <cassert>
 #include <cstdio>
 #include <iostream>
@@ -43,7 +44,7 @@ struct Image_t
   {
    	// when using FreeImage as a static library
     #ifdef FREEIMAGE_LIB
-      //FreeImage_Initialise();
+      FreeImage_Initialise();
     #endif
   }
   
@@ -53,7 +54,7 @@ struct Image_t
     
     // when using FreeImage as a static library
     #ifdef FREEIMAGE_LIB
-      //FreeImage_DeInitialise();
+      FreeImage_DeInitialise();
     #endif
   }
   
