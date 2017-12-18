@@ -17,7 +17,8 @@ if(INCLUDE_DISTRIB)
 	add_subdirectory(distrib)
 endif(INCLUDE_DISTRIB)
 
-
+if(WIN32)
+endif(WIN32)
 
 include_directories(
 	src/
