@@ -123,11 +123,14 @@ void prefilter( const Image_t envmap[6], glm::mat4 M[3])
     }
   }
   
-  // sumWeight for basic : pi * 4
+  // sumWeight for basic : pi*4
   printf("\nsumWeight %f\n", sumWeight);
 
-  /* TODO: why not 4pi ? */
-  const float dnorm = 2.0f * M_PI / sumWeight;
+  // '4*PI/sumWeight' is factor of original paper 
+  // but in [5] "irraidance is turned into exit radiance"
+  // it hard to understand, I think it simply due to
+  // integrate over cos on hemi sphere = pi
+  const float dnorm = 4.0f / sumWeight;
   for (int i=0; i<9; ++i)
   {
     shCoeff[RED][i]   *= dnorm;
@@ -196,10 +199,8 @@ void getTexelAttrib( const int texId, const float u, const float v, const float 
   // <=> sin( acos( z ) );
   
   /**
-   * I'm really not sure for the solid angle computation 
-   * http://seblagarde.wordpress.com/ helps me but I'm still
-   * confuse.
-   * */
+   * see [2]
+   */
   float x0 = u - texelSize;
   float y0 = v - texelSize;
   float x1 = u + texelSize;
